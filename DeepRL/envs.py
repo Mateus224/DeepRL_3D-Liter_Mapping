@@ -17,12 +17,7 @@ safe_log = np.vectorize(safe_log)
 #    5: (0, 0, 30), # rotate right
 #}
 
-ACTIONS = np.array([[1, 0, 0],
-                   [-1, 0, 0],
-                   [0, 1, 0],
-                   [0, -1, 0],
-                   [0, 0, -30],
-                   [0, 0, 30]])
+
 
 class Pose:
     def __init__(self, x=0, y=0, orientation=0):
@@ -88,6 +83,13 @@ class MappingEnvironment(object):
         self.random_pose = randompose
         self.t = None
         self.viewer = None
+        self.ACTIONS = np.array([[1, 0, 0],
+                   [-1, 0, 0],
+                   [0, 1, 0],
+                   [0, -1, 0],
+                   [0, 0, -30],
+                   [0, 0, 30]])
+        print(type(self))
 
     def reset(self):
         # generate new map
@@ -198,11 +200,12 @@ class MappingEnvironment(object):
 
     def num_channels(self):
         return 2
-
+    
+    
     def num_actions(self):
-        print("Actions:", ACTIONS.shape[0])
-        return ACTIONS.shape[0]
-
+        print("Actions:", self.ACTIONS.shape[0])
+        return int(self.ACTIONS.shape[0])
+    
     def step(self, a):
         # Step time
         if self.t is None:
@@ -211,7 +214,7 @@ class MappingEnvironment(object):
         self.t += 1
 
         # Perform action
-        dx, dy, dr = ACTIONS[a]
+        dx, dy, dr = self.ACTIONS[a]
         if self.legal_change_in_pose(self.pose, dx, dy):
             self.pose.x += dx
             self.pose.y += dy
@@ -231,6 +234,7 @@ class MappingEnvironment(object):
             self.t = None
 
         self.l_t = new_l_t
+        print(self.get_observation().shape,"-----------------")
 
         return self.get_observation(), reward, done, None
 
