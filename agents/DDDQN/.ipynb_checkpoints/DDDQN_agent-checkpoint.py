@@ -26,10 +26,10 @@ from keras.utils import plot_model
 class DDDQN_agent(Agent):
 
     def __init__(self, env, args):
-        import tensorflow as tf
         import numpy as np
         from keras import backend as K
         import sys
+
 
         #num_cores = 8
         #GPU = False
@@ -41,9 +41,9 @@ class DDDQN_agent(Agent):
         #    num_CPU = 7
         #    num_GPU = 0
 
-        #config = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=num_cores, \
-        #                                  inter_op_parallelism_threads=num_cores, allow_soft_placement=True, \
-        #                                  device_count={'CPU': num_CPU, 'GPU': num_GPU})
+        config = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=num_cores, \
+                                          inter_op_parallelism_threads=num_cores, allow_soft_placement=True, \
+                                          device_count={'CPU': num_CPU, 'GPU': num_GPU})
         #session = tf.compat.v1.Session(config=config)
         #K.set_session(session)
 

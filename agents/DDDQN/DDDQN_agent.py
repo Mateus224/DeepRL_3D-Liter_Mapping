@@ -41,10 +41,10 @@ class DDDQN_agent(Agent):
         #    num_CPU = 7
         #    num_GPU = 0
 
-        #config = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=num_cores, \
-        #                                  inter_op_parallelism_threads=num_cores, allow_soft_placement=True, \
-        #                                  device_count={'CPU': num_CPU, 'GPU': num_GPU})
-        #session = tf.compat.v1.Session(config=config)
+        config = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=num_cores, \
+                                          inter_op_parallelism_threads=num_cores, allow_soft_placement=True, \
+                                          device_count={'CPU': num_CPU, 'GPU': num_GPU})
+        #no isession = tf.compat.v1.Session(config=config)
         #K.set_session(session)
 
         #config = tf.ConfigProto()
