@@ -41,9 +41,9 @@ class DDDQN_agent(Agent):
         #    num_CPU = 7
         #    num_GPU = 0
 
-        config = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=num_cores, \
-                                          inter_op_parallelism_threads=num_cores, allow_soft_placement=True, \
-                                          device_count={'CPU': num_CPU, 'GPU': num_GPU})
+#        config = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=num_cores, \
+#                                          inter_op_parallelism_threads=num_cores, allow_soft_placement=True, \
+#                                          device_count={'CPU': num_CPU, 'GPU': num_GPU})
         #no isession = tf.compat.v1.Session(config=config)
         #K.set_session(session)
 
@@ -52,8 +52,8 @@ class DDDQN_agent(Agent):
         #set_session(tf.Session(config=config))
 
         # parameters
-        self.frame_width = 49#args.N
-        self.frame_height = 49#args.N
+        self.frame_width = env.observation_size()
+        self.frame_height = env.observation_size()
         self.num_steps = args.num_steps
         self.state_length = 2
         self.gamma = args.gamma
@@ -155,18 +155,22 @@ class DDDQN_agent(Agent):
         """
         if not test:
             if self.epsilon >= random.random() or self.t < self.initial_replay_size:
+                print(observation.shape, "observations")
                 action = random.randrange(self.num_actions)
             else:
                 action = np.argmax(self.q_network.predict([np.expand_dims(observation, axis=0), self.dummy_input])[0])
             # Anneal epsilon linearly over time
+            print(observation.shape, "observations")
             if self.epsilon > self.final_epsilon and self.t >= self.initial_replay_size:
                 self.epsilon -= self.epsilon_step
         else:
+            print('hier')
             if 0.005 >= random.random():
                 action = random.randrange(self.num_actions)
             else:
-                action = np.argmax(self.q_network.predict([np.expand_dims(observation, axis=0), self.dummy_input])[0])
 
+                action = np.argmax(self.q_network.predict([np.expand_dims(observation, axis=0), self.dummy_input])[0])
+                print(action,"asd")
         return action
 
     def build_network(self):

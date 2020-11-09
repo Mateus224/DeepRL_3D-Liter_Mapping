@@ -52,20 +52,35 @@ def run(args):
 
     if args.train_dqn:
         env = MappingEnvironment(ism_proto, N=args.N, p=args.map_p, episode_length=args.episode_length, prims=args.prims)
-
         agent = DDDQN_agent(env, args)
         agent.train()
 
-    if args.test_dqn:
+    else:
         env = MappingEnvironment(ism_proto, N=args.N, p=args.map_p, episode_length=args.episode_length, prims=args.prims)
         agent = DDDQN_agent(env, args)
+        rewards = []
+        for k in range(1000):
+            obs = env.reset()
+            env.render(reset=True)
+            done = False
+            R = 0
+            while not done:
+                # Perform a_t according to agent
+                action = agent.make_action(obs)
+                # Receive reward r_t and new state s_t+1
+                obs, reward, done, info = env.step(action)
+                R += reward
+                env.render()
+            print(R)
+            rewards.append(R)
 
-        if (args.visualize):
-            print("<< visualization >>\n")
+        np.save(os.path.join(opt.experiment, 'rewards_test'), rewards)
+        #if (args.visualize):
+        #    print("<< visualization >>\n")
             #play_game(args, agent, env, total_episodes=1)
-        else:
-            print("<< test >>\n")
-            test(agent, env)
+        #else:
+        #    print("<< test >>\n")
+        #    test(agent, env)
 
 
 if __name__ == '__main__':
