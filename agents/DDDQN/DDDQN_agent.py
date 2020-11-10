@@ -155,7 +155,6 @@ class DDDQN_agent(Agent):
         """
         if not test:
             if self.epsilon >= random.random() or self.t < self.initial_replay_size:
-                print(observation.shape, "observations")
                 action = random.randrange(self.num_actions)
             else:
                 action = np.argmax(self.q_network.predict([np.expand_dims(observation, axis=0), self.dummy_input])[0])
