@@ -241,7 +241,7 @@ def play_game(args, agent, env, total_episodes=1):
     history = { 'state': [], 'un_proc_state' : [], 'action': [], 'gradients_actor':[], 'gradients_critic':[],'gradCam_actor':[],'gradCam_critic':[], 'gdb_actor':[],'gdb_critic':[], 'guidedGradCam_actor':[],'guidedGradCam_critic':[] ,'movie_frames':[]}
     rewards = []
     for i in range(total_episodes):
-        state, origin_state = env.reset()
+        state = env.reset()
         #print("state:",state.shape)
         #print("orgin_state:",origin_state.shape)
         #prozess_atari_wraper_frames(origin_state, state)
@@ -250,7 +250,7 @@ def play_game(args, agent, env, total_episodes=1):
         episode_reward = 0.0
 
         for _ in range(num_frames):
-            state = prozess_atari_wraper_frames(state=state)
+            state = agent.make_action(state)
             history['state'].append(state)
             origin_state=(origin_state * 255).astype(np.uint8)
             history['un_proc_state'].append(origin_state)
