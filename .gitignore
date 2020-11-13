@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 *.py[cod]
 *$py.class
+agents/DDDQN/__pycache__/
 
 # C extensions
 *.so
