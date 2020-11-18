@@ -159,17 +159,15 @@ class DDDQN_agent(Agent):
             else:
                 action = np.argmax(self.q_network.predict([np.expand_dims(observation, axis=0), self.dummy_input])[0])
             # Anneal epsilon linearly over time
-            print(observation.shape, "observations")
             if self.epsilon > self.final_epsilon and self.t >= self.initial_replay_size:
                 self.epsilon -= self.epsilon_step
         else:
-            print('hier')
             if 0.005 >= random.random():
                 action = random.randrange(self.num_actions)
             else:
-
+                print("----------------------------------------------")
+                print(observation)
                 action = np.argmax(self.q_network.predict([np.expand_dims(observation, axis=0), self.dummy_input])[0])
-                print(action,"asd")
         return action
 
     def build_network(self):
@@ -215,7 +213,6 @@ class DDDQN_agent(Agent):
 
     def run(self, state, action, reward, terminal, observation):
         next_state = observation
-
         # Store transition in replay memory
         self.replay_memory.append((state, action, reward, next_state, terminal))
         if len(self.replay_memory) > self.num_replay_memory:

@@ -27,7 +27,7 @@ def parse():
     parser.add_argument('--gradCAM', action='store_false', help='visualize what the network learned with GradCAM')
     parser.add_argument('--gbp_GradCAM', action='store_false',
                         help='visualize what the network learned with Guided GradCAM')
-    parser.add_argument('--visualize', action='store_false',
+    parser.add_argument('--visualize', action='store_true',
                         help='visualize what the network learned with Guided GradCAM')
     try:
         from argument import add_arguments
@@ -80,7 +80,6 @@ def run(args):
                 rewards.append(R)
 
             np.save(os.path.join(opt.experiment, 'rewards_test'), rewards)
-
 
 if __name__ == '__main__':
     import numpy as np
