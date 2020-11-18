@@ -92,7 +92,6 @@ class DDDQN_agent(Agent):
 
         # Input that is not used when fowarding for Q-value
         # or loss calculation on first output of model
-        print(type(env.num_actions))
         self.dummy_input = np.zeros((1, self.num_actions))
         self.dummy_batch = np.zeros((self.batch_size, self.num_actions))
 
@@ -159,14 +158,14 @@ class DDDQN_agent(Agent):
             else:
                 action = np.argmax(self.q_network.predict([np.expand_dims(observation, axis=0), self.dummy_input])[0])
             # Anneal epsilon linearly over time
+            
             if self.epsilon > self.final_epsilon and self.t >= self.initial_replay_size:
                 self.epsilon -= self.epsilon_step
         else:
             if 0.005 >= random.random():
                 action = random.randrange(self.num_actions)
             else:
-                print("----------------------------------------------")
-                print(observation)
+
                 action = np.argmax(self.q_network.predict([np.expand_dims(observation, axis=0), self.dummy_input])[0])
         return action
 
@@ -213,6 +212,7 @@ class DDDQN_agent(Agent):
 
     def run(self, state, action, reward, terminal, observation):
         next_state = observation
+
         # Store transition in replay memory
         self.replay_memory.append((state, action, reward, next_state, terminal))
         if len(self.replay_memory) > self.num_replay_memory:

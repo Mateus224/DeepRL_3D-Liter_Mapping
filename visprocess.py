@@ -241,21 +241,18 @@ def visgame(args, agent, env, total_episodes=1):
     history = { 'state': [], 'un_proc_state' : [], 'action': [], 'gradients_actor':[], 'gradients_critic':[],'gradCam_actor':[],'gradCam_critic':[], 'gdb_actor':[],'gdb_critic':[], 'guidedGradCam_actor':[],'guidedGradCam_critic':[] ,'movie_frames':[]}
     rewards = []
     for i in range(total_episodes):
-        state = env.reset()
         #print("state:",state.shape)
         #print("orgin_state:",origin_state.shape)
         #prozess_atari_wraper_frames(origin_state, state)
-        agent.init_game_setting()
+        #agent.init_game_setting()
+        state = env.reset()
         done = False
         episode_reward = 0.0
 
         for _ in range(num_frames):
-            state = agent.make_action(state)
             history['state'].append(state)
-            origin_state=(origin_state * 255).astype(np.uint8)
-            history['un_proc_state'].append(origin_state)
             action = agent.make_action(state, test=True)
-            state,origin_state, reward, done, info = env.step(action)
+            state, reward, done, info = env.step(action)
             episode_reward += reward
             #agent.save_observation(state)
             #action_state=agent.observations

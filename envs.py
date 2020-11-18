@@ -77,7 +77,7 @@ class MappingEnvironment(object):
     def __init__(self, ism_proto, N=10, p=.1, episode_length=1000, prims=False, randompose=True):
         self.ism_proto = ism_proto
         self.N = N
-        self.p = p #probability map location is occupied'
+        self.p = p
         self.episode_length = episode_length
         self.prims = False
         self.random_pose = randompose
@@ -89,7 +89,6 @@ class MappingEnvironment(object):
                    [0, -1, 0],
                    [0, 0, -30],
                    [0, 0, 30]])
-        print(type(self))
 
     def reset(self):
         # generate new map
@@ -97,8 +96,8 @@ class MappingEnvironment(object):
         if self.prims:
             self.map = self.generate_map_prims()
         else:
-            #create map where zeros are with a probability of 1-self.p and 1 with a probability of self.p
             self.map = np.random.choice([0, 1], p=[1-self.p, self.p], size=(self.N, self.N))
+
         # generate initial pose
         if self.random_pose:
 
@@ -170,7 +169,7 @@ class MappingEnvironment(object):
         return self.in_map(pose.x + dx, pose.y + dy) and self.map[pose.x + dx, pose.y + dy] == 0
 
     def logodds_to_prob(self, l_t):
-        return 1 - 1./(1 + np.exp(l_t)) #sigmoid function
+        return 1 - 1./(1 + np.exp(l_t))
 
     def calc_entropy(self, l_t):
         p_t = self.logodds_to_prob(l_t)
@@ -184,21 +183,6 @@ class MappingEnvironment(object):
     def get_observation(self):
         augmented_p = float("inf")*np.ones((3*self.N-2, 3*self.N-2))
         augmented_p[self.N-1:2*self.N-1, self.N-1:2*self.N-1] = self.l_t
-        #This array is filled that way:
-        #lines 0-23 ; 23-49 ; 49-73:
-
-        #[inf inf inf ... inf inf inf ... inf inf inf]
-        #[inf inf inf ... inf inf inf ... inf inf inf]
-        # .
-        # .
-        #[inf inf inf ... 0   0   0  ... inf inf inf]
-        #[inf inf inf ... 0   0   0  ... inf inf inf]
-        # .
-        # .
-        #[inf inf inf ... inf inf inf ... inf inf inf]
-        #[inf inf inf...  inf inf inf ... inf inf inf]
-
-        print(self.pose.x, self.pose.y, "self.pose.x", self.pose.x+2*self.N-1)
         obs = augmented_p[self.pose.x:self.pose.x+2*self.N-1, self.pose.y:self.pose.y+2*self.N-1]
 
         p = self.logodds_to_prob(obs)
@@ -218,7 +202,6 @@ class MappingEnvironment(object):
     
     
     def num_actions(self):
-        print("Actions:", self.ACTIONS.shape[0])
         return int(self.ACTIONS.shape[0])
     
     def step(self, a):
