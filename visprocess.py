@@ -236,7 +236,7 @@ def make_movie(args,history,fig_array,first_frame,num_frames,resolution,save_dir
 
 
 
-def play_game(args, agent, env, total_episodes=1):
+def visgame(args, agent, env, total_episodes=1):
     
     history = { 'state': [], 'un_proc_state' : [], 'action': [], 'gradients_actor':[], 'gradients_critic':[],'gradCam_actor':[],'gradCam_critic':[], 'gdb_actor':[],'gdb_critic':[], 'guidedGradCam_actor':[],'guidedGradCam_critic':[] ,'movie_frames':[]}
     rewards = []

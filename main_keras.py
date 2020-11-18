@@ -1,6 +1,6 @@
 import os
 import argparse
-#from play_analyse import play_game, test
+from visprocess import visgame
 from envs import MappingEnvironment, LocalISM, RangeISM
 from agents.DDDQN.DDDQN_agent import DDDQN_agent
 
@@ -58,29 +58,28 @@ def run(args):
     else:
         env = MappingEnvironment(ism_proto, N=args.N, p=args.map_p, episode_length=args.episode_length, prims=args.prims)
         agent = DDDQN_agent(env, args)
-        rewards = []
-        for k in range(1000):
-            obs = env.reset()
-            env.render(reset=True)
-            done = False
-            R = 0
-            while not done:
-                # Perform a_t according to agent
-                action = agent.make_action(obs)
-                # Receive reward r_t and new state s_t+1
-                obs, reward, done, info = env.step(action)
-                R += reward
-                env.render()
-            print(R)
-            rewards.append(R)
+        if (args.visualize):
+            print("<< visualization >>\n")
+            visgame(args, agent, env, total_episodes=1)
+        else:
+            print("<< test >>\n")
+            rewards = []
+            for k in range(1000):
+                obs = env.reset()
+                env.render(reset=True)
+                done = False
+                R = 0
+                while not done:
+                    # Perform a_t according to agent
+                    action = agent.make_action(obs)
+                    # Receive reward r_t and new state s_t+1
+                    obs, reward, done, info = env.step(action)
+                    R += reward
+                    env.render()
+                print(R)
+                rewards.append(R)
 
-        np.save(os.path.join(opt.experiment, 'rewards_test'), rewards)
-        #if (args.visualize):
-        #    print("<< visualization >>\n")
-            #play_game(args, agent, env, total_episodes=1)
-        #else:
-        #    print("<< test >>\n")
-        #    test(agent, env)
+            np.save(os.path.join(opt.experiment, 'rewards_test'), rewards)
 
 
 if __name__ == '__main__':
