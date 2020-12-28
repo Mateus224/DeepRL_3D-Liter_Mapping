@@ -31,25 +31,7 @@ class DDDQN_agent(Agent):
         import sys
 
 
-        #num_cores = 8
-        #GPU = False
-        #CPU = True
-        #if GPU:
-        #    num_GPU = 1
-        #    num_CPU = 1
-        #if CPU:
-        #    num_CPU = 7
-        #    num_GPU = 0
 
-#        config = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=num_cores, \
-#                                          inter_op_parallelism_threads=num_cores, allow_soft_placement=True, \
-#                                          device_count={'CPU': num_CPU, 'GPU': num_GPU})
-        #no isession = tf.compat.v1.Session(config=config)
-        #K.set_session(session)
-
-        #config = tf.ConfigProto()
-        #config.gpu_options.per_process_gpu_memory_fraction = args.gpu_frac
-        #set_session(tf.Session(config=config))
 
         # parameters
         self.frame_width = env.observation_size()

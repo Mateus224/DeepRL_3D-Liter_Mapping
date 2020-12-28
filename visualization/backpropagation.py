@@ -4,6 +4,8 @@ import numpy as np
 #import cv2
 from matplotlib import pyplot as plt
 from keras import backend as K
+#from tensorflow.compat.v1.keras import backend as K
+
 from keras.preprocessing import image 
 import tensorflow as tf
 from tensorflow.python.framework import ops
@@ -42,22 +44,26 @@ def build_guided_model(observation_shape, action_space_n):
             return grad * tf.cast(grad > 0., dtype) * \
                    tf.cast(op.inputs[0] > 0., dtype)
 
-    g = K.get_session().graph
+    g = tf.Graph() #K.get_session().graph
+    print(tf.Graph())
     with g.gradient_override_map({'Relu': 'GuidedBackProp'}):
         return build_network(observation_shape, action_space_n)
 
-def init_guided_backprop(guided_model, layer_name):
+def init_guided_backprop(graph, guided_model, layer_name):
+    #
     input_imgs = guided_model.input[0]
-    layer_output = guided_model.get_layer(layer_name).output
-    grads = K.gradients(layer_output, input_imgs)[0]
-    backprop_fn = K.function([input_imgs, K.learning_phase()], [grads])
+    with graph.as_default():
+        layer_output=guided_model.get_layer(layer_name).output
+        grads = K.gradients(layer_output, input_imgs)[0]
+        backprop_fn = K.function([input_imgs, K.learning_phase()], [grads])
     return backprop_fn
 
-def guided_backprop(frame, backprop_fn):
+def guided_backprop(session1, graph, frame, backprop_fn):
     import sys
     np.set_printoptions(threshold=sys.maxsize)
     """Guided Backpropagation method for visualizing input saliency."""
-    grads_val = backprop_fn([frame, 0])[0]
+    with graph.as_default(), session1.as_default():
+        grads_val = backprop_fn([frame, 0])[0]
     return grads_val
 
 

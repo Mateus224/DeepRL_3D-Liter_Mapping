@@ -13,30 +13,37 @@ from tensorflow.python.framework import ops
 timestep=9
 
 
-def init_grad_cam(input_model, layer_name, actor=True):
-
-    action = K.placeholder(shape=(), dtype=np.int32)
+def init_grad_cam(graph, input_model, layer_name, actor=True):
+    tf.compat.v1.disable_eager_execution()
+    with graph.as_default():
+        action = K.placeholder(shape=(), dtype=np.int32)
     if(actor):
+        print("output[0]", input_model.output[0].shape)
         y_c = input_model.output[0][0, action]
-    #else:
-    #    print("output[0]",input_model.output[0].shape)
-    #    y_c = input_model.output[0, action]
+    else:
+        print("output[0]", input_model.output[0].shape)
+        y_c = input_model.output[0, action]
     conv_output = input_model.get_layer(layer_name).output
+
     grads = K.gradients(y_c, conv_output)[0]
     # Normalize if necessary
     #grads = normalize(grads)
     if (actor):
-        gradient_function = K.function([input_model.input[0], action], [conv_output, grads])
+        with graph.as_default():
+            gradient_function = K.function([input_model.input[0], action], [conv_output, grads])
     else:
-        gradient_function = K.function([input_model.input[0],action], [conv_output, grads])
+        with graph.as_default():
+            gradient_function = K.function([input_model.input[0],action], [conv_output, grads])
     return gradient_function
 
-def grad_cam(gradient_function, frame, action, actor=True):
+def grad_cam(session, graph, gradient_function, frame, action, actor=True):
     """GradCAM method for visualizing input saliency."""
     if(actor):
-        output, grads_val = gradient_function([frame,action])#,[action])
+        with graph.as_default(), session.as_default():
+            output, grads_val = gradient_function([frame,action])#,[action])
     else:
-        output, grads_val = gradient_function([frame,0])
+        with graph.as_default(), session.as_default():
+            output, grads_val = gradient_function([frame,0])
     
     weights = np.mean(grads_val, axis=(2,3))
     
@@ -51,7 +58,7 @@ def grad_cam(gradient_function, frame, action, actor=True):
 
 
     #print(cam_.shape)
-    cam = cv2.resize(cam, (84, 84), cv2.INTER_LINEAR)
+    cam = cv2.resize(cam, (49, 49), cv2.INTER_LINEAR)
     
     #cam = np.maximum(cam, 0)
     cam_max = cam.max() 

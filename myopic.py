@@ -53,14 +53,21 @@ for k in range(1000):
     R = 0
     while not done:
         # Perform a_t according to actor_criticb
+        env.render()
         best_ent = 0
         best_action = 0
         for i, (x, y) in enumerate([[1, 0], [-1, 0], [0, 1], [0, -1]]):
-            p = (obs[opt.N-1+x, opt.N-1+y, 0]+1)/2
+            p = (obs[opt.N-1+x, opt.N-1+y, 0]+1)/2 #wahrscheinlichkeit fue die jeweilige aktion. (x+1)/2 scale back probability to 0-1
             mask = np.ones((3, 3))
             mask[1,1] = 0
+
+
             ent = obs[opt.N-1-1+x:opt.N-1+2+x, opt.N-1-1+y:opt.N-1+2+y, 1]
-            expected_ent = (1-p) * np.sum(mask * (ent+1)/2)
+            ent_i= (obs[opt.N-1+x, opt.N-1+y, 1]+1)/2
+
+
+            expected_ent = (1-p) * np.sum(mask * (ent+1)/2)#(x+1)/2 scale back entropy to 0-1
+
             if expected_ent > best_ent:
                 best_ent = expected_ent
                 best_action = i

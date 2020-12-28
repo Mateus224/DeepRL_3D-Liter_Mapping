@@ -1,6 +1,6 @@
 import os
 import argparse
-from visprocess import visgame
+from visprocess import visprocess
 from envs import MappingEnvironment, LocalISM, RangeISM
 from agents.DDDQN.DDDQN_agent import DDDQN_agent
 
@@ -21,7 +21,7 @@ def parse():
     parser.add_argument('--sensor_type', default='local', help='local | range')
     parser.add_argument('--sensor_span', type=int, default=2, help='span of sensor')
     parser.add_argument('--sensor_p', type=float, default=.8, help='probability sensor reading is correct')
-    # Visualization for debugging
+    # Visualization for c
     parser.add_argument('--gbp', action='store_false',
                         help='visualize what the network learned with Guided backpropagation')
     parser.add_argument('--gradCAM', action='store_false', help='visualize what the network learned with GradCAM')
@@ -29,6 +29,7 @@ def parse():
                         help='visualize what the network learned with Guided GradCAM')
     parser.add_argument('--visualize', action='store_true',
                         help='visualize what the network learned with Guided GradCAM')
+    parser.add_argument('--num_frames', type=int, default=80, help= 'how many frames have to be stored in the prozessed video')
     try:
         from argument import add_arguments
         parser = add_arguments(parser)
@@ -60,7 +61,8 @@ def run(args):
         agent = DDDQN_agent(env, args)
         if (args.visualize):
             print("<< visualization >>\n")
-            visgame(args, agent, env, total_episodes=1)
+            visprcess = visprocess(env,args)
+            visprcess.visgame(agent)
         else:
             print("<< test >>\n")
             rewards = []
@@ -85,9 +87,6 @@ if __name__ == '__main__':
     import numpy as np
     import sys
     import tensorflow as tf
-    #gpu_devices = tf.config.experimental.list_physical_devices('GPU')
-    #for device in gpu_devices:
-    #    tf.config.experimental.set_memory_growth(device, True)
     np.set_printoptions(threshold=sys.maxsize)
     args = parse()
     #make path

@@ -34,8 +34,7 @@ class LocalISM(object):
 
     def log_odds(self, pose):
         l = np.zeros((self.N, self.N))
-
-        x_low, x_high = max(pose.x-self.span, 0), min(pose.x+self.span, self.N-1)
+        x_low, x_high = max(pose.x-self.span, 0), min(pose.x+self.span, self.N-1)#absolut sensor distance in x coordinates
         y_low, y_high = max(pose.y-self.span, 0), min(pose.y+self.span, self.N-1)
         for i in range(x_low, x_high+1):
             for j in range(y_low, y_high+1):
@@ -52,6 +51,14 @@ class LocalISM(object):
         l[pose.x, pose.y] = -float("inf")
 
         return l
+class SmGreedy(object):
+    def __init__(self, map, span=2, p_correct=.9):
+        self.map = map
+        self.N = self.map.shape[0]
+        self.p_correct = p_correct
+
+    def log_odds(self, pose):
+        l = np.zeros((self.N, self.N))
 
 class RangeISM(object):
     def __init__(self, map):
@@ -184,7 +191,6 @@ class MappingEnvironment(object):
         augmented_p = float("inf")*np.ones((3*self.N-2, 3*self.N-2))
         augmented_p[self.N-1:2*self.N-1, self.N-1:2*self.N-1] = self.l_t
         obs = augmented_p[self.pose.x:self.pose.x+2*self.N-1, self.pose.y:self.pose.y+2*self.N-1]
-
         p = self.logodds_to_prob(obs)
         ent = self.calc_entropy(obs)
 
@@ -193,8 +199,8 @@ class MappingEnvironment(object):
 
         # # scale entropy to [-1, 1]
         ent /= -np.log(.5)
-        ent = (ent - .5)*2
 
+        ent = (ent - .5)*2
         return np.concatenate([np.expand_dims(p, -1), np.expand_dims(ent, -1)], axis=-1)
 
     def num_channels(self):
