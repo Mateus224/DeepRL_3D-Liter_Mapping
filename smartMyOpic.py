@@ -31,18 +31,14 @@ random.seed(opt.seed)
 np.random.seed(opt.seed)
 
 def stepEntrop(atX, atY):
-    for i, (x, y) in enumerate([[1, 0], [-1, 0], [0, 1], [0, -1]]):
-        p = (obs[
-                 opt.N - 1 + x, opt.N - 1 + y, 0] + 1) / 2  # wahrscheinlichkeit fue die jeweilige aktion. (x+1)/2 scale back probability to 0-1
-        mask = np.ones((3, 3))
-        mask[1, 1] = 0
+    p = (obs[atX, atY, 0] + 1) / 2  # wahrscheinlichkeit fue die jeweilige aktion. (x+1)/2 scale back probability to 0-1
+    mask = np.ones((3, 3))
+    mask[1, 1] = 0
+    ent = obs[atX-1:atX+2, atY-1:atY+2, 1]
 
-        ent = obs[opt.N - 1 - 1 + x:opt.N - 1 + 2 + x, opt.N - 1 - 1 + y:opt.N - 1 + 2 + y, 1]
-        ent_i = (obs[opt.N - 1 + x, opt.N - 1 + y, 1] + 1) / 2
+    expec_entr_atXY = (1 - p) * np.sum(mask * (ent + 1) / 2)  # (x+1)/2 scale back entropy to 0-1
 
-        expected_ent = (1 - p) * np.sum(mask * (ent + 1) / 2)  # (x+1)/2 scale back entropy to 0-1
-
-    return entrop_atXY
+    return expec_entr_atXY
 
 
 
@@ -69,75 +65,104 @@ for k in range(1000):
     R = 0
     while not done:
         # Perform a_t according to actor_critic
+        expected_greed_ent = 0
+        best_greed_action=0
+        best_greed_ent=0
         env.render()
         best_ent = 0
         best_action = 0
-        done=False
-        sum_ent = 0
+        best_sum_ent = 0
+        a = 0
 
-        for x in range(2*opt.N-1):
-            for y in range(2*opt.N-1):
+        for x in range(1,2*opt.N-2):
+            for y in range(1,2*opt.N-2):
+
                 go_x = x
                 go_y = y
-                while not done:
-                    if (x and y)<=(opt.N): # left upper quadrant
-                        if x<y:
-                            go_x= go_x+1
-                            sum_ent += stepEntrop(go_x,go_y)
-                        else:
-                            go_y = go_y+1
-                            sum_ent += stepEntrop(go_x, go_y)
-                    elif (x>opt.N) and (y<=opt.N): # right upper quadrant
-                        if (x-opt.N)<y :
-                            go_x= go_x-1
-                            sum_ent += stepEntrop(go_x, go_y)
-                        else:
-                            go_y = go_y+1
-                            sum_ent += stepEntrop(go_x, go_y)
-                    elif (x<=opt.N) and (y>opt.N): #left lower quadrant
-                        if x<(y-opt.N):
-                            go_y = go_y-1
-                            sum_ent += stepEntrop(go_x, go_y)
-                        else:
-                            go_x= go_x+1
-                            sum_ent += stepEntrop(go_x, go_y)
-                    else: # right lower quadrant
-                        if x<y:
-                            go_y = go_y-1
-                            sum_ent += stepEntrop(go_x, go_y)
-                        else:
-                            go_x= go_x-1
-                            sum_ent += stepEntrop(go_x, go_y)
+                counter=0
+                sum_ent = 0
+                done_1 = False
 
-                    if (go_x==opt.N) && (go_y==opt.N):
-                        done= True
-                if sum_ent > best_sum_ent:
-                    best_sum_ent = sum_ent
-                    best_action = i
+                while not done_1:
+                    if (go_x <=opt.N) and (go_y<=opt.N): # left lower quadrant
+                        if go_y<=go_x:
+                            go_y= go_y+1
+                            sum_ent += stepEntrop(go_x,go_y)
+                            action= 3 # go up
+                        else:
+                            go_x = go_x+1
+                            sum_ent += stepEntrop(go_x, go_y)
+                            action= 1 #go right
+                    elif (go_x>opt.N) and (go_y<=opt.N): # right lower quadrant
+
+                        if (go_x-opt.N)<(opt.N-go_y):
+                            go_y= go_y+1
+                            sum_ent += stepEntrop(go_x, go_y)
+                            action= 3 #go up
+                        else:
+                            go_x = go_x-1
+                            sum_ent += stepEntrop(go_x, go_y)
+                            action= 0 #go left
+
+                    elif (go_x<=opt.N) and (go_y>opt.N): #left upper quadrant
+                        if go_x<=(go_y-opt.N-1):
+                            go_x = go_x + 1
+                            sum_ent += stepEntrop(go_x, go_y)
+                            action= 1 #go right
+                        else:
+                            go_y = go_y -1
+                            sum_ent += stepEntrop(go_x, go_y)
+                            action= 2 #go down
+                    else: # right lower quadrant
+                        if go_x<go_y:
+                            go_x = go_x-1
+                            sum_ent += stepEntrop(go_x, go_y)
+                            action= 0 #go left
+                        else:
+                            go_y= go_y-1
+                            sum_ent += stepEntrop(go_x, go_y)
+                            action= 2 #go down
+                    counter += 1
+
+                    if (go_x==opt.N) and (go_y==opt.N):
+                        done_1= True
+                        sum_ent=sum_ent/(counter+1)
+                        #print(sum_ent)
+
+                        #if (y==47)and (x==47):
+                         #   raise SystemExit(0)
+                        if sum_ent > best_sum_ent:
+                            #print(y,x,sum_ent)
+                            best_sum_ent = sum_ent
+                            best_action = action
 
 
 
         for i, (x, y) in enumerate([[1, 0], [-1, 0], [0, 1], [0, -1]]):
-            p = (obs[
-                     opt.N - 1 + x, opt.N - 1 + y, 0] + 1) / 2  # wahrscheinlichkeit fue die jeweilige aktion. (x+1)/2 scale back probability to 0-1
+            p = (obs[opt.N-1+x, opt.N-1+y, 0]+1)/2 #wahrscheinlichkeit fue die jeweilige aktion. (x+1)/2 scale back probability to 0-1
             mask = np.ones((3, 3))
-            mask[1, 1] = 0
+            mask[1,1] = 0
 
-            ent = obs[opt.N - 1 - 1 + x:opt.N - 1 + 2 + x, opt.N - 1 - 1 + y:opt.N - 1 + 2 + y, 1]
-            ent_i = (obs[opt.N - 1 + x, opt.N - 1 + y, 1] + 1) / 2
 
-            expected_ent = (1 - p) * np.sum(mask * (ent + 1) / 2)  # (x+1)/2 scale back entropy to 0-1
+            ent = obs[opt.N-1-1+x:opt.N-1+2+x, opt.N-1-1+y:opt.N-1+2+y, 1]
+            ent_i= (obs[opt.N-1+x, opt.N-1+y, 1]+1)/2
 
-            if expected_ent > best_ent:
-                best_ent = expected_ent
-                best_action = i
-        if random.random() < 0:
-            a = random.randint(0, 3)
-        else:
-            a = best_action
+
+            expected_greed_ent = (1-p) * np.sum(mask * (ent+1)/2)#(x+1)/2 scale back entropy to 0-1
+            if expected_greed_ent > best_greed_ent:
+                best_greed_ent = expected_greed_ent
+                best_greed_action = i
+
+            if (i==best_action):
+                expacted_greed_sm_ent=expected_greed_ent
+
+
+        if(expacted_greed_sm_ent<0.25):
+            print("hier",expacted_greed_sm_ent)
+            best_action=best_greed_action
 
         # Receive reward r_t and new state s_t+1
-        obs, reward, done, info = env.step(a)
+        obs, reward, done, info = env.step(best_action)
 
         R += reward
     print(R)
