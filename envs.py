@@ -108,7 +108,7 @@ class MappingEnvironment(object):
         # generate initial pose
         if self.random_pose:
 
-            self.x0, self.y0 = np.random.randint(0, self.N), np.random.randint(0, self.N)
+            self.x0, self.y0 = 2, 3#np.random.randint(0, self.N), np.random.randint(0, self.N)
         else:
             self.x0, self.y0 = 0, 0
         self.pose = Pose(self.x0, self.y0, 0)
