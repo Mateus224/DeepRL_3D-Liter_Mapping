@@ -63,6 +63,7 @@ for k in range(1000):
 
     done = False
     R = 0
+    a = 0
     while not done:
         # Perform a_t according to actor_critic
         expected_greed_ent = 0
@@ -72,8 +73,10 @@ for k in range(1000):
         best_ent = 0
         best_action = 0
         best_sum_ent = 0
-        a = 0
-
+        a=a+1
+        store=0
+        _store=0
+        x_,y_=0,0
         for x in range(1,2*opt.N-2):
             for y in range(1,2*opt.N-2):
 
@@ -82,60 +85,92 @@ for k in range(1000):
                 counter=0
                 sum_ent = 0
                 done_1 = False
+                #if (x==47 and y==47 and a==2):
+                #    print(best_action,x_,y_)
+                #    raise SystemExit(0)
+                #print(x,y)
 
                 while not done_1:
-                    if (go_x <=opt.N) and (go_y<=opt.N): # left lower quadrant
-                        if go_y<=go_x:
+                    #print("tracck", go_x, go_y)
+
+
+                    if (go_x <opt.N) and (go_y<=opt.N): # left lower quadrant
+                        if go_y < go_x:
                             go_y= go_y+1
                             sum_ent += stepEntrop(go_x,go_y)
-                            action= 3 # go up
+                            action= 3 # go down
+                            store=1
+                            #print("1:", go_x, go_y, x ,y, sum_ent)
                         else:
                             go_x = go_x+1
                             sum_ent += stepEntrop(go_x, go_y)
-                            action= 1 #go right
-                    elif (go_x>opt.N) and (go_y<=opt.N): # right lower quadrant
+                            action=  1 #go left
+                            store = 2
+                            #print("2:", go_x, go_y , x, y, sum_ent)
 
-                        if (go_x-opt.N)<(opt.N-go_y):
-                            go_y= go_y+1
+                    elif (go_x>=opt.N) and (go_y<opt.N): # right lower quadrantg
+                        if (go_x - (opt.N+1)) <= (opt.N-go_y):
+                            go_y = go_y+1
                             sum_ent += stepEntrop(go_x, go_y)
-                            action= 3 #go up
+                            action= 3 # go down
+                            store = 3
+                            #print("3:", go_x, go_y, x, y, sum_ent)
                         else:
                             go_x = go_x-1
                             sum_ent += stepEntrop(go_x, go_y)
-                            action= 0 #go left
+                            action= 0 #go right
+                            store = 4
+                            #print("4:", go_x, go_y, x, y, sum_ent)
 
                     elif (go_x<=opt.N) and (go_y>opt.N): #left upper quadrant
-                        if go_x<=(go_y-opt.N-1):
+                        if go_x<=((2*opt.N-1)-go_y):
                             go_x = go_x + 1
                             sum_ent += stepEntrop(go_x, go_y)
-                            action= 1 #go right
+                            action= 1 #go left
+                            store = 5
+                            #print("5:", go_x, go_y, x, y,sum_ent)
                         else:
-                            go_y = go_y -1
+
+                            go_y = go_y-1
                             sum_ent += stepEntrop(go_x, go_y)
-                            action= 2 #go down
-                    else: # right lower quadrant
-                        if go_x<go_y:
-                            go_x = go_x-1
+                            action= 2 #go up
+                            store = 6
+                            #print("6:", go_x, go_y, x, y, sum_ent)
+                    else: # right upper quadrant
+                        if go_x<=go_y:
+                            go_y = go_y-1
                             sum_ent += stepEntrop(go_x, go_y)
-                            action= 0 #go left
+                            action= 2 #go up
+                            store = 7
+                            #print("7:", go_x, go_y, x, y, sum_ent)
                         else:
-                            go_y= go_y-1
+                            go_x= go_x-1
                             sum_ent += stepEntrop(go_x, go_y)
-                            action= 2 #go down
+                            action= 0 #go right
+                            store = 8
+                            #print("8:", go_x, go_y, x, y, sum_ent)
                     counter += 1
+
 
                     if (go_x==opt.N) and (go_y==opt.N):
                         done_1= True
                         sum_ent=sum_ent/(counter+1)
-                        #print(sum_ent)
+                        #print(action, sum_ent,x,y)
 
-                        #if (y==47)and (x==47):
-                         #   raise SystemExit(0)
+
                         if sum_ent > best_sum_ent:
-                            #print(y,x,sum_ent)
+                            x_,y_=x,y
+                            _store=store
                             best_sum_ent = sum_ent
-                            best_action = action
-
+                            best_action =  action
+                            #print(best_action, best_sum_ent, x_, y_)
+        #import time
+        #time.sleep(30)
+        #if (a<=1):
+        #    print(best_action, x_,y_,_store)
+        #else:
+        #    print(best_action, x_, y_, _store)
+        #    raise SystemExit(0)
 
 
         for i, (x, y) in enumerate([[1, 0], [-1, 0], [0, 1], [0, -1]]):
@@ -153,16 +188,19 @@ for k in range(1000):
                 best_greed_ent = expected_greed_ent
                 best_greed_action = i
 
+
             if (i==best_action):
                 expacted_greed_sm_ent=expected_greed_ent
 
 
-        if(expacted_greed_sm_ent<0.25):
-            print("hier",expacted_greed_sm_ent)
-            best_action=best_greed_action
 
+        if(expacted_greed_sm_ent<(0.12)):
+            best_action=best_greed_action
+            print("greedy")
+        print(x_,y_, "action", best_action, _store)
         # Receive reward r_t and new state s_t+1
         obs, reward, done, info = env.step(best_action)
+
 
         R += reward
     print(R)
