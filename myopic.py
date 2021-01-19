@@ -63,7 +63,7 @@ for k in range(1000):
 
 
             ent = obs[opt.N-1-1+x:opt.N-1+2+x, opt.N-1-1+y:opt.N-1+2+y, 1]
-            ent_i= (obs[opt.N-1+x, opt.N-1+y, 1]+1)/2
+            #ent_i= (obs[opt.N-1+x, opt.N-1+y, 1]+1)/2
 
 
             expected_ent = (1-p) * np.sum(mask * (ent+1)/2)#(x+1)/2 scale back entropy to 0-1
